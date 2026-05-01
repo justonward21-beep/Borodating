@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>boro | التحقق المتعدد</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-yellow: #fbbf24;
+            --bg-dark: #0f172a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-dark);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: 'Cairo', sans-serif;
+            overflow: hidden;
+        }
+
+        .liquid-bg {
+            position: absolute;
+            width: 400px; height: 400px;
+            background: var(--primary-yellow);
+            filter: blur(100px);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.2;
+            animation: move 20s infinite alternate;
+        }
+
+        @keyframes move { from { top: 0; left: 0; } to { bottom: 0; right: 0; } }
+
+        .auth-card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border);
+            padding: 30px;
+            border-radius: 25px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .logo { font-size: 2rem; font-weight: bold; margin-bottom: 20px; }
+        .logo span { color: var(--primary-yellow); }
+
+        input {
+            width: 100%; padding: 12px; margin: 8px 0;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px; color: white; outline: none;
+        }
+
+        button {
+            width: 100%; padding: 12px; margin-top: 15px;
+            background: var(--primary-yellow); border: none;
+            border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+
+        .secondary-btn { background: white; color: black; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        
+        #recaptcha-container { margin-top: 10px; }
+        
+        .hidden { display: none; }
+        
+        .tab-menu { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-menu div { flex: 1; padding: 10px; cursor: pointer; border-bottom: 2px solid transparent; font-size: 0.9rem; }
+        .tab-menu div.active { border-color: var(--primary-yellow); color: var(--primary-yellow); }
+    </style>
+</head>
+<body>
+
+    <div class="liquid-bg"></div>
+
+    <div class="auth-card">
+        <div class="logo">boro<span>.</span></div>
+        
+        <div class="tab-menu">
+            <div id="tabEmail" class="active" onclick="switchTab('email')">بالبريد</div>
+            <div id="tabPhone" onclick="switchTab('phone')">بالهاتف</div>
+        </div>
+
+        <div id="emailSection">
+            <input type="email" id="email" placeholder="البريد الإلكتروني">
+            <input type="password" id="password" placeholder="كلمة المرور">
+            <button onclick="handleEmailAuth()">دخول / تسجيل</button>
+        </div>
+
+        <div id="phoneSection" class="hidden">
+            <input type="tel" id="phoneNumber" placeholder="+213XXXXXXXXX">
+            <div id="recaptcha-container"></div>
+            <button id="sendOtpBtn" onclick="handlePhoneAuth()">إرسال رمز التحقق</button>
+            
+            <div id="otpInputSection" class="hidden">
+                <input type="text" id="otpCode" placeholder="أدخل الرمز المكون من 6 أرقام">
+                <button onclick="verifyOtp()">تأكيد الرمز</button>
+            </div>
+        </div>
+
+        <div style="margin: 20px 0; opacity: 0.3;">أو</div>
+
+        <button class="secondary-btn" onclick="handleGoogleLogin()">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
+            متابعة باستخدام Google
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+        import { 
+            getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
+            sendEmailVerification, GoogleAuthProvider, signInWithPopup,
+            RecaptchaVerifier, signInWithPhoneNumber 
+        } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAAIJfQ5SrrhqHG6RS-0oksErwOgT4E4fc",
+            authDomain: "boroxo.firebaseapp.com",
+            projectId: "boroxo",
+            storageBucket: "boroxo.firebasestorage.app",
+            messagingSenderId: "153525763925",
+            appId: "1:153525763925:web:c72ab7dc51348ce3e979dc"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // تبديل التبويبات
+        window.switchTab = (type) => {
+            document.getElementById('emailSection').classList.toggle('hidden', type !== 'email');
+            document.getElementById('phoneSection').classList.toggle('hidden', type !== 'phone');
+            document.getElementById('tabEmail').classList.toggle('active', type === 'email');
+            document.getElementById('tabPhone').classList.toggle('active', type === 'phone');
+        };
+
+        // --- 1. بريد إلكتروني ---
+        window.handleEmailAuth = async () => {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            try {
+                // محاولة تسجيل دخول، إذا فشل نقوم بإنشاء حساب
+                await signInWithEmailAndPassword(auth, email, pass).then(res => {
+                    if(!res.user.emailVerified) alert("يرجى تفعيل البريد أولاً!");
+                    else window.location.href = "home.html";
+                });
+            } catch (e) {
+                if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
+                    const res = await createUserWithEmailAndPassword(auth, email, pass);
+                    await sendEmailVerification(res.user);
+                    alert("تم إنشاء الحساب، تفقد بريدك للتفعيل.");
+                } else alert(e.message);
+            }
+        };
+
+        // --- 2. جوجل ---
+        window.handleGoogleLogin = async () => {
+            try {
+                await signInWithPopup(auth, googleProvider);
+                window.location.href = "home.html";
+            } catch (e) { alert(e.message); }
+        };
+
+        // --- 3. رقم الهاتف ---
+        window.setupRecaptcha = () => {
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                'size': 'normal'
+            });
+        };
+
+        window.handlePhoneAuth = async () => {
+            const number = document.getElementById('phoneNumber').value;
+            if (!window.recaptchaVerifier) setupRecaptcha();
+            
+            try {
+                const confirmationResult = await signInWithPhoneNumber(auth, number, window.recaptchaVerifier);
+                window.confirmationResult = confirmationResult;
+                document.getElementById('otpInputSection').classList.remove('hidden');
+                document.getElementById('sendOtpBtn').classList.add('hidden');
+                alert("تم إرسال الرمز!");
+            } catch (e) { alert(e.message); }
+        };
+
+        window.verifyOtp = async () => {
+            const code = document.getElementById('otpCode').value;
+            try {
+                await window.confirmationResult.confirm(code);
+                alert("تم التحقق بنجاح!");
+                window.location.href = "home.html";
+            } catch (e) { alert("الرمز خاطئ"); }
+        };
+    </script>
+</body>
+</html>

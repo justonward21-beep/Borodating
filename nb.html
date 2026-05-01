@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* تنسيق الزر الثابت */
+        #boroChatBtn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            z-index: 999999 !important; /* تأكيد الظهور فوق كل شيء */
+            display: block; /* التأكد من أنه مرئي دائماً */
+            transition: transform 0.3s ease;
+        }
+
+        #boroChatBtn img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0px 4px 10px rgba(0,0,0,0.15));
+        }
+
+        #boroChatBtn:hover {
+            transform: scale(1.1);
+        }
+
+        @media screen and (max-width: 480px) {
+            #boroChatBtn { bottom: 25px; right: 15px; width: 55px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="boroChatBtn" onclick="openSmartsuppChat()">
+        <img src="logo.png" alt="Support">
+    </div>
+
+    <script type="text/javascript">
+        var _smartsupp = _smartsupp || {};
+        _smartsupp.key = 'c56a654eeb25cb9d1f66d8ff7e21622425fb4271';
+        _smartsupp.hideWidget = true; // إخفاء الزر الأصلي دائماً
+
+        window.smartsupp||(function(d) {
+            var s,c,o=smartsupp=function(){ o._.push(arguments)};o._=[];
+            s=d.getElementsByTagName('script')[0];c=d.createElement('script');
+            c.type='text/javascript';c.charset='utf-8';c.async=true;
+            c.src='https://www.smartsuppchat.com/loader.js?';s.parentNode.insertBefore(c,s);
+        })(document);
+
+        // وظيفة فتح الدردشة
+        function openSmartsuppChat() {
+            smartsupp('chat:open');
+        }
+
+        // إجبار اللوجو على البقاء ظاهراً حتى بعد إغلاق الدردشة
+        smartsupp('on', 'chat:close', function() {
+            var btn = document.getElementById('boroChatBtn');
+            if (btn) {
+                btn.style.display = 'block';
+                btn.style.visibility = 'visible';
+                btn.style.opacity = '1';
+            }
+        });
+
+        // لضمان عدم اختفاء اللوجو عند بدء الدردشة (إذا كنت تفضل ذلك)
+        smartsupp('on', 'chat:open', function() {
+            // يمكنك إخفاء اللوجو هنا إذا كنت تريد أن تظهر نافذة الدردشة فقط
+            // document.getElementById('boroChatBtn').style.display = 'none';
+        });
+    </script>
+
+</body>
+</html>

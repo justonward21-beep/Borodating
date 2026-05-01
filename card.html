@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>boro - Banking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #000000;
+            --card-bg: #121212;
+            --boro-yellow: #FFD700;
+            --white: #ffffff;
+            --gray-text: #8e8e93;
+            --ios-blur: rgba(20, 20, 20, 0.8);
+            --border-radius: 30px;
+            --danger: #ff453a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #1c1c1e; display: flex; justify-content: center; align-items: center; min-height: 100vh; color: var(--white); }
+
+        .app-container { width: 100%; max-width: 390px; height: 100vh; max-height: 844px; background-color: var(--bg-color); position: relative; overflow: hidden; display: flex; flex-direction: column; }
+
+        .screen { display: none; flex-direction: column; padding: 24px; height: calc(100% - 95px); overflow-y: auto; animation: ios-slide 0.4s ease; }
+        .screen.active { display: flex; }
+        @keyframes ios-slide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Headers */
+        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 25px; padding-top: 10px; }
+        .header h1 { font-size: 28px; font-weight: 800; color: var(--boro-yellow); letter-spacing: -1px; }
+
+        /* Card Component */
+        .flip-card { background-color: transparent; width: 100%; aspect-ratio: 1.58 / 1; perspective: 1000px; cursor: pointer; margin: 20px 0; }
+        .flip-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; }
+        .flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 20px; background: #121212; border: 1px solid #222; overflow: hidden; }
+        .flip-card-back { transform: rotateY(180deg); }
+        .chip { position: absolute; top: 20px; left: 20px; width: 35px; filter: invert(1); }
+        .number { position: absolute; font-family: monospace; font-size: 18px; top: 55%; left: 20px; color: white; letter-spacing: 2px; }
+        .card-name { position: absolute; bottom: 20px; left: 20px; font-size: 14px; font-weight: 700; color: var(--boro-yellow); }
+        .strip { position: absolute; width: 100%; height: 40px; top: 20px; background: #000; }
+        .sstrip { position: absolute; background: var(--boro-yellow); width: 20%; height: 30px; top: 80px; right: 20px; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: black; font-weight: 900; }
+
+        /* Wallet Elements */
+        .wallet-actions { display: flex; gap: 12px; margin-bottom: 25px; }
+        .action-btn { flex: 1; padding: 15px; border-radius: 20px; border: none; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-deposit { background: var(--card-bg); color: var(--boro-yellow); border: 1px solid #333; }
+        .btn-withdraw { background: var(--boro-yellow); color: #000; }
+
+        .crypto-card { background: var(--card-bg); padding: 18px; border-radius: 22px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; border: 1px solid #222; }
+        .crypto-info { display: flex; align-items: center; gap: 12px; }
+        .crypto-icon { width: 40px; height: 40px; }
+
+        /* Transactions History */
+        .history-item { background: var(--card-bg); padding: 18px; border-radius: 22px; margin-bottom: 12px; border-right: 4px solid var(--boro-yellow); }
+        .history-header { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; }
+        .check-btn { background: var(--boro-yellow); color: black; padding: 8px 15px; border-radius: 12px; font-size: 11px; font-weight: 800; text-decoration: none; display: inline-block; margin-top: 10px; }
+
+        /* Settings */
+        .settings-group { background: var(--card-bg); border-radius: 24px; overflow: hidden; margin-bottom: 20px; }
+        .settings-item { padding: 18px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #1c1c1e; align-items: center; }
+        .logout-btn { color: var(--danger); justify-content: center; font-weight: 800; cursor: pointer; }
+
+        /* Nav */
+        .bottom-nav { height: 95px; background: var(--ios-blur); backdrop-filter: blur(20px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #222; padding-bottom: 20px; }
+        .nav-btn { color: #555; cursor: pointer; text-align: center; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .nav-btn.active { color: var(--boro-yellow); }
+        
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(10px); }
+        .modal-content { background: var(--card-bg); width: 85%; padding: 30px; border-radius: 35px; text-align: center; border: 1px solid #333; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <div id="screen-cards" class="screen active">
+            <div class="header"><h1>boro.</h1><div class="notif-btn"><i class="fa-solid fa-bell"></i></div></div>
+            <div style="background: var(--card-bg); padding: 25px; border-radius: 25px; border: 1px solid #222; text-align: center;">
+                <p style="color: var(--gray-text); font-size: 14px;">Available Balance</p>
+                <h2 style="font-size: 38px; margin: 10px 0;">$3,200.00</h2>
+            </div>
+
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <svg class="chip" viewBox="0 0 50 50"><image width="50" height="50" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAB6VBMVEUAAACNcTiVeUKVeUOYfEaafEeUeUSYfEWZfEaykleyklaXe0SWekSZZjOYfEWYe0WXfUWXe0WcgEicfkiXe0SVekSXekSWekKYe0a9nF67m12ZfUWUeEaXfESVekOdgEmVeUWWekSniU+VeUKVeUOrjFKYfEWliE6WeESZe0GSe0WYfES7ml2Xe0WXeESUeEOWfEWcf0eWfESXe0SXfEWYekSVeUKXfEWxklawkVaZfEWWekOUekOWekSYfESZe0eXekWYfEWZe0WZe0eVeUSWeETAnmDCoWLJpmbxy4P1zoXwyoLIpWbjvXjivnjgu3bfu3beunWvkFWxkle/nmDivXiWekTnwXvkwHrCoWOuj1SXe0TEo2TDo2PlwHratnKZfEbQrWvPrWuafUfbt3PJp2agg0v0zYX0zYSfgkvKp2frxX7mwHrlv3rsxn/yzIPgvHfduXWXe0XuyIDzzISsjVO1lVm0lFitjVPzzIPqxX7duna0lVncuHTLqGjvyIHeuXXxyYGZfUayk1iyk1e2lln1zYTEomO2llrbtnOafkjFpGSbfkfZtXLhvHfkv3nqxH3mwXujhU3KqWizlFilh06khk2fgkqsjlPHpWXJp2erjVOhg0yWe0SliE+XekShhEvAn2D///+gx8TWAAAARnRSTlMACVCTtsRl7Pv7+vxkBab7pZv5+ZlL/UnU/f3SJCVe+Fx39naA9/75XSMh0/3SSkia+pil/KRj7Pr662JPkrbP7OLQ0JFOijI1MwAAAAFiS0dEorDd34wAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfnAg0IDx2lsiuJAAACLElEQVRIx2NgGAXkAUYmZhZWPICFmYkRVQcbOwenmzse4MbFzc6DpIGXj8PD04sA8PbhF+CFaxEU8iWkAQT8hEVgOkTF/InR4eUVICYO1SIhCRMLDAoKDvFDVhUaEhwUFAjjSUlDdMiEhcOEItzdI6OiYxA6YqODIt3dI2DcuDBZsBY5eVTr4xMSYcyk5BRUOXkFsBZFJTQnp6alQxgZmVloUkrKYC0qqmji2WE5EEZuWB6alKoKdi35YQUQRkFYPpFaCouKIYzi6EDitJSUlsGY5RWVRGjJLyxNy4ZxqtIqqvOxaVELQwZFZdkIJVU1RSiSalAt6rUwUBdWG1CP6pT6gNqwOrgCdQyHNYR5YQFhDXj8MiK1IAeyN6aORiyBjByVTc0FqBoKWpqwRCVSgilOaY2OaUPw29qjOzqLvTAchpos47u6EZyYnngUSRwpuTe6D+6qaFQdOPNLRzOM1dzhRZyW+CZouHk3dWLXglFcFIflQhj9YWjJGlZcaKAVSvjyPrRQ0oQVKDAQHlYFYUwIm4gqExGmBSkutaVQJeomwViTJqPK6OhCy2Q9sQBk8cY0DxjTJw0lAQWK6cOKfgNhpKK7ZMpUeF3jPa28BCETamiEqJKM+X1gxvWXpoUjVIVPnwErw71nmpgiqiQGBjNzbgs3j1nus+fMndc+Cwm0T52/oNR9lsdCS24ra7Tq1cbWjpXV3sHRCb1idXZ0sGdltXNxRateRwHRAACYHutzk/2I5QAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyMy0wMi0xM1QwODoxNToyOSswMDowMEUnN7UAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjMtMDItMTNUMDg6MTU6MjkrMDA6MDA0eo8JAAAAKHRFWHRkYXRlOnRpbWVzdGFtcAAyMDIzLTAyLTEzVDA4OjE1OjI5KzAwOjAwY2+u1gAAAABJRU5ErkJggg=="></image></svg>
+                        <p class="number">4532 9000 8193 6346</p>
+                        <p class="card-name">OSMO LAMI</p>
+                        <p style="position:absolute; top:20px; right:20px; font-size:10px; font-weight:800; color:var(--boro-yellow);">BORO CARD</p>
+                    </div>
+                    <div class="flip-card-back"><div class="strip"></div><div class="sstrip">788</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-assets" class="screen">
+            <div class="header"><h1>Wallet</h1></div>
+            <div class="wallet-actions">
+                <button class="action-btn btn-deposit"><i class="fa-solid fa-plus"></i> Deposit</button>
+                <button class="action-btn btn-withdraw"><i class="fa-solid fa-arrow-up"></i> Withdraw</button>
+            </div>
+
+            <div class="crypto-card">
+                <div class="crypto-info"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" class="crypto-icon"><div><h4>Tether</h4><p style="color:var(--gray-text); font-size:12px;">USDT</p></div></div>
+                <div style="text-align:right"><span style="color:var(--boro-yellow); font-weight:800;">729.66</span></div>
+            </div>
+
+            <div class="crypto-card">
+                <div class="crypto-info"><img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" class="crypto-icon"><div><h4>BNB</h4><p style="color:var(--gray-text); font-size:12px;">Smart Chain</p></div></div>
+                <div style="text-align:right"><span style="font-weight:800;">0.02</span></div>
+            </div>
+
+            <h3 style="margin: 20px 0 15px; font-size: 16px; color: var(--gray-text);">Withdrawal History</h3>
+            
+            <div class="history-item">
+                <div class="history-header"><span>USDT Withdrawal</span><span style="color:var(--boro-yellow)">COMPLETED</span></div>
+                <p style="font-size:12px; color:var(--gray-text); margin-top:4px;">245.00 USDT</p>
+                <a href="https://tronscan.org/#/transaction/4dc7df311f68fb9441ce52c9ee958d04a4b8a60438e20b73955b8ae552910a6e" target="_blank" class="check-btn">Check Transaction</a>
+            </div>
+
+            <div class="history-item">
+                <div class="history-header"><span>USDT Withdrawal</span><span style="color:var(--boro-yellow)">COMPLETED</span></div>
+                <p style="font-size:12px; color:var(--gray-text); margin-top:4px;">112.50 USDT</p>
+                <a href="https://tronscan.org/#/transaction/45e02eff06d55fbaae3ea4200f6cd8f4b6d952224b6b8adeb3276d02013a025b" target="_blank" class="check-btn">Check Transaction</a>
+            </div>
+
+            <div class="history-item">
+                <div class="history-header"><span>USDT Withdrawal</span><span style="color:var(--boro-yellow)">COMPLETED</span></div>
+                <p style="font-size:12px; color:var(--gray-text); margin-top:4px;">50.00 USDT</p>
+                <a href="https://tronscan.org/#/transaction/8c49bf54e67ee84aacb64fbfcf076bcfeb1b7fb1eb60f5d0c27d88d695da6cc7" target="_blank" class="check-btn">Check Transaction</a>
+            </div>
+        </div>
+
+        <div id="screen-settings" class="screen">
+            <div class="header"><h1>Profile</h1></div>
+            <div style="text-align:center; margin-bottom:30px;">
+                <img src="pic.png" style="width:100px; height:100px; border-radius:50%; border:2px solid var(--boro-yellow);" onerror="this.src='https://via.placeholder.com/100'">
+                <h2 style="margin-top:15px;">Osmo Lami</h2>
+                <p style="color:var(--gray-text); font-size:14px;">kimlogp2017@gmail.com</p>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-item"><span>Full Name</span><span style="color:var(--gray-text)">Osmo Lami</span></div>
+                <div class="settings-item"><span>Email</span><span style="color:var(--gray-text)">kimlogp2017@gmail.com</span></div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-item" onclick="showSecurityModal()" style="cursor:pointer;">
+                    <span><i class="fa-solid fa-lock" style="color:var(--boro-yellow); margin-right:10px;"></i> Change Password</span>
+                    <i class="fa-solid fa-chevron-right" style="color:#333;"></i>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-item logout-btn" onclick="window.location.href='dash.html'">
+                    <i class="fa-solid fa-right-from-bracket" style="margin-right:10px;"></i> Log out
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-btn active" onclick="navigateTo('cards', this)"><i class="fa-solid fa-house"></i><span>Home</span></div>
+            <div class="nav-btn" onclick="navigateTo('assets', this)"><i class="fa-solid fa-wallet"></i><span>Wallet</span></div>
+            <div class="nav-btn" onclick="navigateTo('settings', this)"><i class="fa-solid fa-user"></i><span>Profile</span></div>
+        </div>
+
+        <div id="security-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div style="font-size: 50px; color: var(--boro-yellow); margin-bottom: 20px;"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3 style="margin-bottom: 10px;">Security Check</h3>
+                <p style="color: var(--gray-text); font-size: 14px; line-height: 1.6;">لقد أرسلنا كود التحقق لتغيير كلمة المرور إلى رقمك البلجيكي:</p>
+                <div style="font-weight: 800; font-size: 24px; color: var(--boro-yellow); margin: 25px 0;">+32 478 55 91 72</div>
+                <button onclick="hideSecurityModal()" style="background: var(--boro-yellow); border:none; width:100%; padding:16px; border-radius:18px; font-weight:800; cursor:pointer;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function navigateTo(screenName, element) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen-' + screenName).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            element.classList.add('active');
+        }
+        function showSecurityModal() { document.getElementById('security-modal').style.display = 'flex'; }
+        function hideSecurityModal() { document.getElementById('security-modal').style.display = 'none'; }
+    </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Boro - Contact Support</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+
+    <style>
+        body {
+            background-color: #f8f9fa; /* خلفية نهارية فاتحة */
+            font-family: 'Cairo', sans-serif;
+            color: #1a1a1a; /* نص داكن للوضوح */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .contact-card {
+            background: #ffffff; /* بطاقة بيضاء */
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 40px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08); /* ظل ناعم */
+            text-align: center;
+        }
+
+        .contact-item {
+            background: #f1f3f5; /* خلفية العناصر رمادي فاتح جداً */
+            border: 1px solid #e9ecef;
+            padding: 20px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #1a1a1a;
+        }
+
+        .contact-item:active {
+            transform: scale(0.96);
+            background: #e2e6ea;
+        }
+
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-left: 15px;
+        }
+
+        .details {
+            text-align: right;
+            flex-grow: 1;
+        }
+
+        .details h3 {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 0;
+            color: #2d3436;
+        }
+
+        .details p {
+            font-size: 11px;
+            color: #636e72; /* نص فرعي رمادي */
+            margin: 2px 0 0 0;
+        }
+
+        /* ألوان الأيقونات في الوضع النهاري */
+        .live-chat .icon-box { background: rgba(252, 196, 25, 0.15); color: #e67e22; }
+        .email-support .icon-box { background: rgba(59, 130, 246, 0.15); color: #0984e3; }
+        .phone-support .icon-box { background: rgba(34, 197, 94, 0.15); color: #27ae60; }
+
+        .arrow-icon {
+            color: #b2bec3;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="contact-card">
+        <h2 class="text-xl font-black mb-8 text-zinc-800">اتصل بنا</h2>
+
+        <div onclick="openSmartsupp()" class="contact-item live-chat cursor-pointer">
+            <div class="icon-box">
+                <i class="fi fi-sr-headset"></i>
+            </div>
+            <div class="details">
+                <h3>تواصل مباشر</h3>
+                <p>دردشة فورية مع الدعم</p>
+            </div>
+            <i class="fi fi-sr-angle-small-left arrow-icon"></i>
+        </div>
+
+        <a href="mailto:boro@usa.com" class="contact-item email-support">
+            <div class="icon-box">
+                <i class="fi fi-sr-envelope"></i>
+            </div>
+            <div class="details">
+                <h3>البريد الإلكتروني</h3>
+                <p>boro@usa.com</p>
+            </div>
+            <i class="fi fi-sr-angle-small-left arrow-icon"></i>
+        </a>
+
+        <a href="tel:+12125904617" class="contact-item phone-support">
+            <div class="icon-box">
+                <i class="fi fi-sr-phone-call"></i>
+            </div>
+            <div class="details">
+                <h3>رقم الهاتف</h3>
+                <p dir="ltr">+1 (212) 590-4617</p>
+            </div>
+            <i class="fi fi-sr-angle-small-left arrow-icon"></i>
+        </a>
+
+        <p class="mt-8 text-zinc-400 text-[10px] leading-relaxed">فريق عمل Boro متواجد لخدمتك 24/7</p>
+    </div>
+
+    <script type="text/javascript">
+        var _smartsupp = _smartsupp || {};
+        _smartsupp.key = 'efc1461e124d21e9e5e9b0b9aa5bc3aea372a98f';
+        window.smartsupp||(function(d) {
+            var s,c,o=smartsupp=function(){ o._.push(arguments)};o._=[];
+            s=d.getElementsByTagName('script')[0];c=d.createElement('script');
+            c.type='text/javascript';c.charset='utf-8';c.async=true;
+            c.src='https://www.smartsuppchat.com/loader.js?';s.parentNode.insertBefore(c,s);
+        })(document);
+
+        function openSmartsupp() {
+            if (window.smartsupp) {
+                window.smartsupp('chat:open');
+            }
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Boro Live - Complete Unified</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-solid-rounded/css/uicons-solid-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-bold-rounded/css/uicons-bold-rounded.css'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/lucide-static/0.321.0/lucide.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-body: #0a0a0a;       
+            --nav-bg: #1a1a1a;        
+            --active-color: #fcc419;  
+            --text-inactive: #8e8e93; 
+            --modal-overlay: rgba(0, 0, 0, 0.95);
+            --card-bg: #141414;
+            --border-color: #262626;
+        }
+
+        html, body {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            overflow: hidden; height: 100%; width: 100%;
+            position: fixed; background: var(--bg-body); color: #ffffff;
+        }
+
+        body { display: flex; flex-direction: column; }
+
+        .main-content {
+            flex: 1; width: 100%; padding-bottom: 110px;
+            display: none; animation: fadeIn 0.3s ease;
+            overflow-y: auto; -webkit-overflow-scrolling: touch;
+        }
+        .main-content.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .navigation {
+            position: fixed; bottom: 20px; left: 5%; width: 90%; height: 65px;
+            background: var(--nav-bg); display: flex; z-index: 100;
+            border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .navigation ul { display: flex; width: 100%; position: relative; padding: 0; margin: 0; }
+        .navigation ul li { list-style: none; flex: 1; height: 65px; z-index: 1; }
+        .navigation ul li a { display: flex; justify-content: center; align-items: center; flex-direction: column; width: 100%; height: 100%; text-decoration: none; }
+        .navigation ul li a .icon { font-size: 1.3em; transition: 0.5s; color: var(--text-inactive); }
+        .navigation ul li.active a .icon { transform: translateY(-32px); color: #000; }
+        .navigation ul li a .text { position: absolute; font-weight: 600; font-size: 0.65em; transition: 0.5s; opacity: 0; transform: translateY(15px); }
+        .navigation ul li.active a .text { opacity: 1; transform: translateY(10px); color: var(--active-color); }
+        .indicator { position: absolute; top: -50%; width: 60px; height: 60px; background: var(--active-color); border-radius: 50%; border: 6px solid var(--bg-body); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        .custom-modal {
+            position: fixed; inset: 0; background: var(--modal-overlay);
+            display: none; justify-content: center; align-items: center;
+            z-index: 2000; backdrop-filter: blur(15px); padding: 20px;
+        }
+        .custom-modal.active { display: flex; }
+        .modal-card {
+            background: #111; padding: 25px; border-radius: 25px;
+            text-align: center; width: 100%; max-width: 350px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .avatar-container { position: relative; width: 90px; height: 90px; border-radius: 50%; padding: 3px; border: 2px solid var(--active-color); margin: 0 auto 15px; }
+        .avatar-container img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #222; }
+        
+        .menu-list { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; margin-top: 10px; }
+        .menu-item { display: flex; align-items: center; padding: 15px 18px; border-bottom: 1px solid var(--border-color); cursor: pointer; }
+        .menu-item:last-child { border-bottom: none; }
+        .item-icon { width: 34px; height: 34px; background: #1a1a1c; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #777; }
+        .item-label { flex: 1; font-size: 14px; color: #e0e0e0; margin: 0 12px; text-align: right; }
+        
+        .toggle-switch { width: 38px; height: 20px; background: #2c2c2e; border-radius: 20px; position: relative; transition: 0.3s; }
+        .toggle-switch::after { content: ''; position: absolute; width: 16px; height: 16px; background: #fff; border-radius: 50%; top: 2px; right: 2px; transition: 0.3s; }
+        .toggle-switch.active { background: var(--active-color); }
+        .toggle-switch.active::after { transform: translateX(-18px); }
+
+        .dynamic-glow {
+            position: absolute; top: 0; width: 100%; height: 400px;
+            opacity: 0.2; filter: blur(100px); transition: background 0.7s ease;
+            pointer-events: none; z-index: 0;
+        }
+        @keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .animate-slide-up { animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    </style>
+</head>
+<body>
+
+    <div id="language-modal" class="custom-modal active">
+        <div class="modal-card">
+            <p class="text-white text-lg font-bold mb-6">اختر اللغة / Select Language</p>
+            <div class="flex flex-col gap-2">
+                <button class="bg-white/5 p-4 rounded-xl border border-white/10 w-full flex justify-between items-center" onclick="selectLanguage('ar')">
+                    <span>العربية</span> <i class="fi fi-rr-angle-small-left"></i>
+                </button>
+                <button class="bg-white/5 p-4 rounded-xl border border-white/10 w-full flex justify-between items-center" onclick="selectLanguage('en')">
+                    <span>English</span> <i class="fi fi-rr-angle-small-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="payment-overlay" class="fixed inset-0 z-[3000] hidden flex flex-col justify-end">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closePayment()"></div>
+        <div class="relative w-full h-[90vh] bg-white rounded-t-[2.5rem] flex flex-col animate-slide-up overflow-hidden">
+            <div class="p-6 border-b border-zinc-100 flex justify-between items-center">
+                <button onclick="closePayment()" class="bg-zinc-100 p-3 rounded-2xl text-zinc-400"><i class="fi fi-rr-cross"></i></button>
+                <div class="text-right">
+                    <span class="block text-[10px] font-black text-zinc-400 uppercase tracking-tighter">Boro Secure Gateway</span>
+                    <span id="pay-amount-label" class="text-sm font-black text-black"></span>
+                </div>
+                <div class="flex items-center gap-2 px-3 py-1 bg-green-50 rounded-full border border-green-100 text-green-600 font-bold text-[10px]">
+                    <i class="fi fi-rr-shield-check"></i> SECURE
+                </div>
+            </div>
+            <iframe id="pay-iframe" src="about:blank" class="flex-1 w-full border-none"></iframe>
+        </div>
+    </div>
+
+    <div id="edit-profile-modal" class="custom-modal">
+        <div class="modal-card">
+            <h3 class="text-white text-lg font-bold mb-5" data-tr-ar="تعديل الحساب" data-tr-en="Edit Profile">تعديل الحساب</h3>
+            <input type="text" id="input-name" class="w-full bg-[#1a1a1a] border border-[#333] p-3 rounded-xl text-white mb-3" placeholder="Name">
+            <input type="email" id="input-email" class="w-full bg-[#1a1a1a] border border-[#333] p-3 rounded-xl text-white mb-5" placeholder="Email">
+            <button class="w-full bg-[#fcc419] text-black p-3 rounded-xl font-bold" onclick="saveProfileData()" data-tr-ar="حفظ" data-tr-en="Save">حفظ</button>
+            <button class="text-zinc-500 mt-4 text-xs" onclick="closeEditModal()" data-tr-ar="إلغاء" data-tr-en="Cancel">إلغاء</button>
+        </div>
+    </div>
+
+    <div id="content-models" class="main-content active">
+        <div class="p-5 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-white">Boro Live</h1>
+            <div class="flex gap-4 text-zinc-400"><i class="fi fi-rr-search"></i><i class="fi fi-rr-bell"></i></div>
+        </div>
+        <div class="flex gap-4 overflow-x-auto px-5 mb-6 scroll-hide">
+            <script>
+                for(let i=0; i<6; i++) {
+                    document.write(`
+                        <div class="flex-shrink-0 text-center">
+                            <div class="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 to-orange-600 mb-1">
+                                <img src="https://xsgames.co/randomusers/assets/avatars/female/${20+i}.jpg" class="w-full h-full rounded-full border-2 border-black object-cover">
+                            </div>
+                            <span class="text-[10px] text-zinc-500 font-bold">LIVE</span>
+                        </div>
+                    `);
+                }
+            </script>
+        </div>
+        <div class="grid grid-cols-2 gap-3 px-5" id="girls-grid"></div>
+        <div class="p-6">
+            <button onclick="switchTabByTarget('content-live')" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-black py-4 rounded-2xl font-bold flex items-center justify-center gap-3">
+                <i class="fas fa-crown"></i> <span data-tr-ar="عرض كافة العروض" data-tr-en="View All Offers">عرض كافة العروض</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="content-live" class="main-content">
+        <div id="bg-glow" class="dynamic-glow"></div>
+        <div class="relative z-10 p-6 flex flex-col items-center">
+            <h1 class="text-xl font-black mb-6 w-full text-right" data-tr-ar="عروض الاشتراك" data-tr-en="Subscription Offers">عروض الاشتراك</h1>
+            
+            <div class="w-full bg-zinc-900/60 rounded-2xl p-1.5 flex mb-8 border border-white/5 backdrop-blur-xl shadow-2xl">
+                <button onclick="switchPlanTab('900')" id="tab-900" class="tab-btn-offer flex-1 py-3 rounded-xl text-[10px] font-black transition-all duration-300">1200 Da</button>
+                <button onclick="switchPlanTab('1200')" id="tab-1200" class="tab-btn-offer flex-1 py-3 rounded-xl text-[10px] font-black transition-all duration-300">1800 Da</button>
+                <button onclick="switchPlanTab('2999')" id="tab-2999" class="tab-btn-offer flex-1 py-3 rounded-xl text-[10px] font-black transition-all duration-300">2999 DA</button>
+            </div>
+
+            <div id="main-offer-card" class="w-full bg-[#141414] rounded-[2rem] overflow-hidden border border-white/5 shadow-2xl transition-all duration-500">
+                <div class="p-6 text-right" dir="rtl">
+                    <div class="flex justify-between items-center mb-4">
+                        <span id="plan-period" class="text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full border"></span>
+                        <span class="text-zinc-500 text-[10px] font-bold uppercase">Pricing</span>
+                    </div>
+                    <h2 id="plan-title" class="text-zinc-400 text-xs font-bold mb-1"></h2>
+                    <div class="flex items-baseline justify-end gap-1 mb-2">
+                        <span class="text-lg font-bold text-zinc-500">DA</span>
+                        <span id="plan-price" class="text-5xl font-black text-white"></span>
+                    </div>
+                    <p id="plan-desc" class="text-zinc-500 text-[10px] leading-relaxed mb-6"></p>
+                </div>
+                <div id="features-list-offer" class="px-6 pb-6 space-y-3" dir="rtl">
+                    <h4 class="text-[9px] font-black text-zinc-600 uppercase mb-2">الميزات المشمولة:</h4>
+                </div>
+                <div class="p-6 pt-0">
+                    <button onclick="openPayment()" id="cta-btn-offer" class="w-full font-black py-4 rounded-xl text-sm flex items-center justify-center gap-2">
+                        <span data-tr-ar="ابدأ الاشتراك الآن" data-tr-en="Start Subscription">ابدأ الاشتراك الآن</span>
+                        <i class="lucide-arrow-right w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="content-messages" class="main-content">
+        <div class="p-5 text-center flex flex-col items-center justify-center h-[70vh]">
+            <div class="w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center mb-4 text-zinc-600">
+                <i class="fi fi-rr-comment-dots text-3xl"></i>
+            </div>
+            <p class="text-zinc-500 text-sm" data-tr-ar="لا توجد رسائل حالياً" data-tr-en="No messages yet">لا توجد رسائل حالياً</p>
+        </div>
+    </div>
+
+    <div id="content-settings" class="main-content">
+        <div class="p-5 text-center">
+            <div class="avatar-container" onclick="document.getElementById('file-input').click()">
+                <img id="avatar-img" src="https://via.placeholder.com/150/222">
+                <div class="absolute bottom-[-5px] left-1/2 -translate-x-1/2 bg-[#fcc419] text-black text-[9px] font-black px-3 rounded-full">PRO</div>
+            </div>
+            <input type="file" id="file-input" class="hidden" accept="image/*" onchange="uploadPhoto(this)">
+            <h2 id="display-name" class="text-xl font-bold mt-2">Username</h2>
+            <p id="display-email" class="text-zinc-500 text-xs mb-3">example@email.com</p>
+            <button class="bg-[#1c1c1e] border border-[#262626] px-5 py-2 rounded-full text-xs flex items-center gap-2 mx-auto" onclick="openEditModal()">
+                <i class="fi fi-rr-edit"></i> <span data-tr-ar="تعديل" data-tr-en="Edit">تعديل</span>
+            </button>
+
+            <div class="text-right mt-6">
+                <p class="text-[10px] text-zinc-600 font-bold uppercase mr-2 mb-2">الإعدادات العامة</p>
+                <div class="menu-list">
+                    <div class="menu-item">
+                        <div class="item-icon"><i class="fi fi-rr-eye"></i></div>
+                        <div class="item-label" data-tr-ar="المراقب الخفي" data-tr-en="Hidden Monitor">المراقب الخفي</div>
+                        <div class="toggle-switch active"></div>
+                    </div>
+                    <div class="menu-item" onclick="switchTabByTarget('content-live')">
+                        <div class="item-icon"><i class="fi fi-rr-crown text-yellow-500"></i></div>
+                        <div class="item-label" data-tr-ar="ترقية العضوية" data-tr-en="Upgrade Membership">ترقية العضوية</div>
+                        <i class="fi fi-rr-angle-small-left text-zinc-700"></i>
+                    </div>
+                </div>
+
+                <p class="text-[10px] text-zinc-600 font-bold uppercase mr-2 mt-4 mb-2">النظام</p>
+                <div class="menu-list">
+                    <div class="menu-item" onclick="location.reload()">
+                        <div class="item-icon"><i class="fi fi-rr-exit text-red-500"></i></div>
+                        <div class="item-label text-red-500" data-tr-ar="تسجيل الخروج" data-tr-en="Logout">تسجيل الخروج</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="content-support" class="main-content">
+        <div class="p-6">
+            <h1 class="text-xl font-bold mb-6" data-tr-ar="مركز الدعم" data-tr-en="Support Center">مركز الدعم</h1>
+            <div class="bg-[#141414] border border-[#262626] rounded-3xl p-6 text-center">
+                <i class="fi fi-sr-headset text-4xl text-[#fcc419] mb-4"></i>
+                <h2 class="text-lg font-bold mb-2">هل تحتاج مساعدة؟</h2>
+                <p class="text-zinc-500 text-xs mb-6">فريقنا متواجد 24/7 للرد على استفساراتك.</p>
+                <button onclick="openContact()" class="w-full bg-[#fcc419] text-black font-black py-4 rounded-2xl flex items-center justify-center gap-3">
+                    <i class="fi fi-rr-comment"></i> <span data-tr-ar="تحدث معنا الآن" data-tr-en="Chat Now">تحدث معنا الآن</span>
+                </button>
+            </div>
+            <div class="mt-8">
+                <p class="text-[10px] text-zinc-600 font-bold uppercase mb-4 tracking-widest">الأسئلة الشائعة</p>
+                <div class="space-y-3">
+                    <div class="bg-[#141414] p-4 rounded-xl border border-white/5 text-sm text-zinc-300 flex justify-between">
+                        <span>كيفية شحن الرصيد؟</span> <i class="fi fi-rr-plus text-zinc-700"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <ul id="nav-list">
+            <li class="list" data-target="content-settings" data-text-ar="الإعدادات" data-text-en="Settings">
+                <a href="#"><span class="icon"><i class="fi fi-rr-settings"></i></span><span class="text">Settings</span></a>
+            </li>
+            <li class="list" data-target="content-live" data-text-ar="مباشر" data-text-en="Live">
+                <a href="#"><span class="icon"><i class="fi fi-sr-house-chimney-heart"></i></span><span class="text">Live</span></a>
+            </li>
+            <li class="list" data-target="content-messages" data-text-ar="رسائل" data-text-en="Messages">
+                <a href="#"><span class="icon"><i class="fi fi-br-comment-smile"></i></span><span class="text">Messages</span></a>
+            </li>
+            <li class="list active" data-target="content-models" data-text-ar="موديلات" data-text-en="Models">
+                <a href="#"><span class="icon"><i class="fi fi-br-flame"></i></span><span class="text">Models</span></a>
+            </li>
+            <li class="list" data-target="content-support" data-text-ar="الدعم" data-text-en="Support">
+                <a href="#"><span class="icon"><i class="fi fi-sr-headset"></i></span><span class="text">Support</span></a>
+            </li>
+            <div class="indicator" id="indicator"></div>
+        </ul>
+    </div>
+
+    <script>
+        let currentLang = 'ar';
+        const list = document.querySelectorAll('.list');
+        const indicator = document.getElementById('indicator');
+
+        const plans = {
+            '900': {
+                title: 'Boro Live PREMIUM', price: '1200 ', period: 'Month',
+                desc: 'استمتع بميزات الدردشة الأساسية مع خصوصية كاملة ودعم فني.',
+                color: '#fcc419', btnTextColor: 'black', payFile: 'pay1.html',
+                features: [{t: '60 ساعة مكالمات فيديو', inc: true}, {t: 'رسائل نصية غير محدود', inc: true}, {t: 'شارة VIP ذهبية', inc: false}]
+            },
+            '1200': {
+                title: 'Boro Live GOLD', price: '1800', period: '3 Months',
+                desc: 'مثالي للمستخدمين الجادين للحصول على نتائج أسرع وظهور أقوى.',
+                color: '#f43f5e', btnTextColor: 'white', payFile: 'pay2.html',
+                features: [{t: '200 ساعة مكالمات فيديو', inc: true}, {t: 'ظهور مميز في البحث', inc: true}, {t: 'بدون إعلانات تماماً', inc: true}]
+            },
+            '2999': {
+                title: 'Boro Live ELITE', price: '2,999', period: '1 Year',
+                desc: 'تجربة لا محدودة مع أقصى درجات الخصوصية والتميز الفاخر.',
+                color: '#8b5cf6', btnTextColor: 'white', payFile: 'pay3.html',
+                features: [{t: 'ساعات فيديو غير محدودة', inc: true}, {t: 'إخفاء الموقع والحالة', inc: true}, {t: 'مدير حساب خاص VIP', inc: true}]
+            }
+        };
+
+        let activeId = '900';
+
+        function openContact() {
+            document.getElementById('pay-amount-label').innerText = "مركز التواصل / Contact";
+            document.getElementById('pay-iframe').src = "contact.html";
+            document.getElementById('payment-overlay').classList.remove('hidden');
+        }
+
+        function openPayment() {
+            const plan = plans[activeId];
+            document.getElementById('pay-amount-label').innerText = `${plan.price} DA`;
+            document.getElementById('pay-iframe').src = plan.payFile;
+            document.getElementById('payment-overlay').classList.remove('hidden');
+        }
+
+        function closePayment() { 
+            document.getElementById('payment-overlay').classList.add('hidden');
+            document.getElementById('pay-iframe').src = "about:blank";
+        }
+
+        function switchPlanTab(id) {
+            activeId = id;
+            const plan = plans[id];
+            document.getElementById('bg-glow').style.background = `radial-gradient(circle, ${plan.color} 0%, transparent 70%)`;
+            
+            document.querySelectorAll('.tab-btn-offer').forEach(btn => {
+                const bId = btn.id.split('-')[1];
+                btn.style.backgroundColor = (bId === id) ? plan.color : 'transparent';
+                btn.style.color = (bId === id) ? plan.btnTextColor : '#71717a';
+            });
+
+            const card = document.getElementById('main-offer-card');
+            card.style.borderColor = `${plan.color}44`;
+            document.getElementById('plan-period').innerText = `${plan.period} Plan`;
+            document.getElementById('plan-period').style.color = plan.color;
+            document.getElementById('plan-title').innerText = plan.title;
+            document.getElementById('plan-price').innerText = plan.price;
+            document.getElementById('plan-desc').innerText = plan.desc;
+
+            const listOff = document.getElementById('features-list-offer');
+            listOff.innerHTML = `<h4 class="text-[9px] font-black text-zinc-600 uppercase mb-2">الميزات المشمولة:</h4>`;
+            plan.features.forEach(f => {
+                const div = document.createElement('div');
+                div.className = `flex items-center gap-3 ${f.inc ? 'opacity-100' : 'opacity-20'}`;
+                div.innerHTML = `<div class="w-4 h-4 rounded-full flex items-center justify-center" style="background-color: ${f.inc ? plan.color : '#27272a'}">
+                    <i class="fi ${f.inc ? 'fi-rr-check' : 'fi-rr-cross'} text-[8px] ${plan.btnTextColor === 'black' ? 'text-black' : 'text-white'}"></i>
+                </div><span class="text-[11px] font-bold text-zinc-200">${f.t}</span>`;
+                listOff.appendChild(div);
+            });
+            document.getElementById('cta-btn-offer').style.backgroundColor = plan.color;
+            document.getElementById('cta-btn-offer').style.color = plan.btnTextColor;
+        }
+
+        function selectLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            // تم حذف سطر تشغيل الصوت من هنا
+            updateTranslations();
+            document.getElementById('language-modal').classList.remove('active');
+            generateGallery();
+            setTimeout(() => { switchTab(document.querySelector('.list.active')); switchPlanTab('900'); }, 100);
+        }
+
+        function updateTranslations() {
+            document.querySelectorAll('[data-tr-ar]').forEach(el => {
+                el.innerText = el.getAttribute(`data-tr-${currentLang}`);
+            });
+            list.forEach(item => {
+                item.querySelector('.text').innerText = item.getAttribute(`data-text-${currentLang}`);
+            });
+        }
+
+        function switchTab(element) {
+            if(!element) return;
+            list.forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+            const rect = element.getBoundingClientRect();
+            const parentRect = element.closest('ul').getBoundingClientRect();
+            indicator.style.left = (rect.left - parentRect.left + (element.offsetWidth/2) - 30) + 'px';
+            document.querySelectorAll('.main-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(element.getAttribute('data-target')).classList.add('active');
+        }
+
+        function switchTabByTarget(targetId) {
+            const targetItem = Array.from(list).find(item => item.getAttribute('data-target') === targetId);
+            if(targetItem) switchTab(targetItem);
+        }
+
+        list.forEach(item => item.onclick = (e) => { e.preventDefault(); switchTab(item); });
+
+        function generateGallery() {
+            const container = document.getElementById('girls-grid');
+            container.innerHTML = '';
+            for(let i = 0; i < 8; i++) {
+                const v = Math.floor(Math.random() * 3000) + 100;
+                container.innerHTML += `
+                    <div class="relative h-56 rounded-2xl overflow-hidden bg-zinc-900">
+                        <div class="absolute top-2 right-2 bg-red-600 text-[9px] font-bold px-2 py-0.5 rounded-md z-10">LIVE ${v}</div>
+                        <img src="https://xsgames.co/randomusers/assets/avatars/female/${(i * 4 + 10) % 50}.jpg" class="w-full h-full object-cover opacity-80">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent"></div>
+                        <p class="absolute bottom-3 right-3 text-[9px] font-bold text-white">Boro ID: ${987 + i}</p>
+                    </div>`;
+            }
+        }
+
+        function openEditModal() {
+            const u = JSON.parse(localStorage.getItem('boro_user') || '{"name":"","email":""}');
+            document.getElementById('input-name').value = u.name;
+            document.getElementById('input-email').value = u.email;
+            document.getElementById('edit-profile-modal').classList.add('active');
+        }
+        function closeEditModal() { document.getElementById('edit-profile-modal').classList.remove('active'); }
+        function saveProfileData() {
+            const n = document.getElementById('input-name').value;
+            const e = document.getElementById('input-email').value;
+            localStorage.setItem('boro_user', JSON.stringify({name:n, email:e}));
+            document.getElementById('display-name').innerText = n;
+            document.getElementById('display-email').innerText = e;
+            closeEditModal();
+        }
+        function uploadPhoto(input) {
+            if (input.files && input.files[0]) {
+                const r = new FileReader();
+                r.onload = (ev) => {
+                    document.getElementById('avatar-img').src = ev.target.result;
+                    localStorage.setItem('boro_img', ev.target.result);
+                };
+                r.readAsDataURL(input.files[0]);
+            }
+        }
+        window.onload = () => {
+            const u = JSON.parse(localStorage.getItem('boro_user'));
+            if(u){ document.getElementById('display-name').innerText = u.name; document.getElementById('display-email').innerText = u.email; }
+            const p = localStorage.getItem('boro_img');
+            if(p) document.getElementById('avatar-img').src = p;
+        };
+        document.querySelectorAll('.toggle-switch').forEach(sw => sw.onclick = (e) => { e.stopPropagation(); sw.classList.toggle('active'); });
+    </script>
+</body>
+</html>

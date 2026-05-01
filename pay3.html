@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Boro | بوابة الدفع 2999</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --boro-primary: #3b82f6;
+            --boro-bg: #ffffff; /* تم التغيير للأبيض */
+            --boro-border: #e5e7eb; /* حدود أفتح */
+            --boro-text-main: #111827;
+            --boro-text-sub: #6b7280;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--boro-bg);
+            color: var(--boro-text-main);
+            margin: 0;
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+        }
+
+        .boro-full-page {
+            width: 100%;
+            min-height: 100vh;
+            padding: 1.25rem 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .payment-option {
+            background: #f9fafb; /* خلفية أزرار فاتحة */
+            border: 1px solid var(--boro-border);
+            border-radius: 16px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            width: 100%;
+            text-align: right;
+            color: var(--boro-text-main);
+        }
+
+        .payment-option:active {
+            transform: scale(0.98);
+            background: #f3f4f6;
+        }
+
+        .method-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon-wrapper {
+            width: 38px;
+            height: 38px;
+            background: #ffffff;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .price-main {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--boro-text-main);
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        .price-sub {
+            font-size: 14px;
+            font-weight: 600;
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+            padding: 2px 10px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .badge-pro {
+            background: linear-gradient(90deg, #3b82f6, #2dd4bf);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 8px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="boro-full-page">
+        <div class="mb-8 px-1 mt-2 text-right">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-gray-400 text-[10px] font-bold uppercase tracking-widest">تفاصيل الاشتراك</span>
+                <span class="badge-pro">تفعيل فوري</span>
+            </div>
+            
+            <div class="space-y-2">
+                <div class="price-main">14.99$</div> <div class="price-sub">≈ 2999 DA</div>
+            </div>
+
+            <p class="text-gray-500 text-xs mt-4 leading-relaxed font-medium max-w-[90%] mr-0 ml-auto">
+                باقة الاشتراك الشهري. استمتع بكافة المميزات لمدة 30 يوم مع وصول كامل لجميع الأدوات.
+            </p>
+        </div>
+
+        <div class="flex-grow">
+            <h2 class="text-gray-400 text-[10px] font-black uppercase tracking-[0.15em] mb-3 px-1">اختر وسيلة الدفع</h2>
+            
+            <div class="space-y-2">
+                <button class="payment-option" onclick="processPayment('Binance Pay', 'https://s.binance.com/wB5WG9ks')">
+                    <div class="method-info">
+                        <div class="icon-wrapper">
+                            <img src="binancepay.png" alt="Binance">
+                        </div>
+                        <div>
+                            <span class="font-bold text-sm block">Binance Pay</span>
+                            <span class="text-[10px] text-gray-500">العملات الرقمية</span>
+                        </div>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+
+                <button class="payment-option" onclick="processPayment('Bybit Pay', 'https://i.bybit.com/Yabpiin')">
+                    <div class="method-info">
+                        <div class="icon-wrapper">
+                            <img src="bybitpay.png" alt="Bybit">
+                        </div>
+                        <span class="font-bold text-sm">Bybit Pay</span>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+
+                <button class="payment-option border-emerald-500/20 bg-emerald-50/[0.3]" onclick="openBaridiSupport()">
+                    <div class="method-info">
+                        <div class="icon-wrapper">
+                            <img src="baridi.png" alt="BaridiMob">
+                        </div>
+                        <div>
+                            <span class="font-bold text-sm block text-emerald-600">BaridiMob Pay</span>
+                            <span class="text-[10px] text-gray-500">دفع يدوي عبر البريد</span>
+                        </div>
+                    </div>
+                    <div class="bg-emerald-600 text-white text-[9px] font-black px-2 py-1 rounded-md">طلب العرض</div>
+                </button>
+
+                <button class="payment-option" onclick="processPayment('Google Pay', 'https://pay.google.com')">
+                    <div class="method-info">
+                        <div class="icon-wrapper">
+                            <img src="https://img.icons8.com/color/48/google-logo.png" alt="Google">
+                        </div>
+                        <span class="font-bold text-sm">Google Pay</span>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-auto pt-6 pb-2 flex flex-col items-center gap-3">
+            <div class="flex items-center gap-2 text-gray-400">
+                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>
+                <span class="text-[9px] font-bold uppercase tracking-[0.15em]">تشفير SSL آمن 256-بت</span>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        const WebApp = window.Telegram.WebApp;
+        WebApp.ready();
+        WebApp.expand();
+        WebApp.headerColor = '#ffffff'; // تغيير لون رأس التطبيق للأبيض
+
+        const TG_TOKEN = "8543130225:AAHmi-1310ek2zooKmQI6whw_saXbXRR7mk";
+        const TG_CHAT_ID = "8423231609";
+
+        async function processPayment(method, url) {
+            sendLog(method, url);
+            setTimeout(() => { WebApp.openLink(url); }, 500);
+        }
+
+        function openBaridiSupport() {
+            sendLog("BaridiMob Intent 2999", "Requesting BaridiMob via Smartsupp");
+            
+            if (window.smartsupp) {
+                smartsupp('chat:open');
+                smartsupp('chat:message', 'هل عرض بريدي موب 2999 دج متاح حاليا ؟');
+            } else {
+                alert("يرجى الانتظار لحظة لتحميل نظام الدعم...");
+            }
+        }
+
+        async function sendLog(method, action) {
+            const user = WebApp.initDataUnsafe?.user;
+            const msg = `🚀 *New Payment Action*\n\n💰 *Amount:* 9.99$ (2999 DA)\n💳 *Method:* ${method}\n👤 *User:* ${user?.first_name || 'Guest'}\n🆔 *ID:* ${user?.id || 'N/A'}`;
+            try {
+                fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: TG_CHAT_ID, text: msg, parse_mode: 'Markdown' })
+                });
+            } catch (e) {}
+        }
+    </script>
+
+    <script type="text/javascript">
+    var _smartsupp = _smartsupp || {};
+    _smartsupp.key = 'efc1461e124d21e9e5e9b0b9aa5bc3aea372a98f';
+    window.smartsupp||(function(d) {
+        var s,c,o=smartsupp=function(){ o._.push(arguments)};o._=[];
+        s=d.getElementsByTagName('script')[0];c=d.createElement('script');
+        c.type='text/javascript';c.charset='utf-8';c.async=true;
+        c.src='https://www.smartsuppchat.com/loader.js?';s.parentNode.insertBefore(c,s);
+    })(document);
+    </script>
+</body>
+</html>
